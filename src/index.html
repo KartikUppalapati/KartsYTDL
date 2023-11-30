@@ -59,6 +59,7 @@
             const clientSecret = "530dcb7cc7dd43e2bf0e5ff4ebad6be2"
             var ipc = require('electron').ipcRenderer;
             var listOfSongFilesData = [];
+            var listOfSongSearchedData = [];
             var numSongs = 0;
 
             // Set all buttons to disabled except choose folder button
@@ -286,7 +287,7 @@
                 // Go through all tracks in response
                 for (let i = 0; i < data.tracks.items.length; i++)
                 {
-                    // Get individual response song's meta data
+                    // Get individual response song's meta data and push into list data
                     var songMetaData = 
                     {
                         "songName": data.tracks.items[i].name,
@@ -294,10 +295,11 @@
                         "artistName": data.tracks.items[i].artists[0].name,
                         "albumImage": data.tracks.items[i].album.images[0].url
                     }
+                    listOfSongSearchedData.push(songMetaData);
 
                     // Create and add song's html for text box
                     document.getElementById("slideoutTextArea").innerHTML +=
-                    `<div class="textAreaSongItem" ondblclick='copyChosenTrack(${JSON.stringify(songMetaData)})'>
+                    `<div class="textAreaSongItem" ondblclick="copyChosenTrack(${i})">
                         <table>
                             <td>
                                 <img src="${songMetaData.albumImage}" width="50" height="50">
@@ -308,7 +310,7 @@
                                 Album: ${songMetaData.albumName}</br>
                             </td>
                             <td>
-                                <i class="fa fa-clone hoverMe" aria-hidden="true" style="font-size: 15px;" onclick='copyChosenTrack(${JSON.stringify(songMetaData)})'></i>
+                                <i class="fa fa-clone hoverMe" aria-hidden="true" style="font-size: 15px;" onclick="copyChosenTrack(${i})"></i>
                             </td>
                         </table>
                     </div>`
@@ -316,8 +318,9 @@
             }
 
             // For song editing modal
-            function copyChosenTrack(songMetaData)
+            function copyChosenTrack(songMetaDataIndex)
             {
+                songMetaData = listOfSongSearchedData[songMetaDataIndex];
                 document.getElementById("songEditImage").src = songMetaData.albumImage;
                 document.getElementById("songEditTitle").value = songMetaData.songName;
                 document.getElementById("songEditArtist").value = songMetaData.artistName;
@@ -379,6 +382,9 @@
                         songMetaData.artistName = document.getElementById("songEditArtist").value;
                         songMetaData.albumName = document.getElementById("songEditAlbum").value;
                         songMetaData.albumImage = document.getElementById("songEditImage").src;
+
+                        // Clear out saved song search data from list
+                        listOfSongSearchedData = [];
                     }
                 }
             }
